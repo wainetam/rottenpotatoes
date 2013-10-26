@@ -31,7 +31,7 @@ class MoviesController < ApplicationController
     end
 
     unless params[:ratings]
-      session[:ratings] ? params[:ratings] = session[:ratings] : @movies = Movie.all
+      session[:ratings] ? params[:ratings] = session[:ratings] : @movies
     end
     # to save selected boxes
     if params[:ratings] == nil # upon first visit to the site
