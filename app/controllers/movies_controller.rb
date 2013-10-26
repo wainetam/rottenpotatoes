@@ -1,5 +1,4 @@
 class MoviesController < ApplicationController
-
   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
@@ -7,7 +6,29 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    @all_ratings = all_ratings()
+    if params[:sort] == 'title'
+      @movies = Movie.order('title ASC')
+      @hilite_title = true
+    elsif params[:sort] == 'release_date'
+      @movies = Movie.order('release_date DESC')
+      @hilite_date = true
+    else
+      @movies = Movie.all
+    end
+
+    # to save selected boxes
+    if params[:ratings] == nil # upon first visit to the site
+      @ratings_filter = ['G', 'NC-17', 'PG', 'PG-13', 'R']
+    else
+      selected_movies = []
+      @ratings_filter = params[:ratings].keys
+      @ratings_filter.each do |rating|
+        selected_movies << Movie.where("rating = '#{rating}'")
+        selected_movies.flatten!
+      end
+      @movies = selected_movies
+    end 
   end
 
   def new
@@ -38,4 +59,13 @@ class MoviesController < ApplicationController
     redirect_to movies_path
   end
 
+  def all_ratings
+    all_ratings = []
+    @movies = Movie.all
+    @movies.each do |movie|
+      all_ratings.push(movie.rating)
+    end
+    all_ratings.to_set.sort
+    # @all_ratings = Movie.select('rating').to_set.sort
+  end
 end
