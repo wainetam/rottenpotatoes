@@ -8,47 +8,116 @@ class MoviesController < ApplicationController
   end
 
   def index
-    # session.clear
+    session.clear
+
+    # unless params[:sort] and params[:ratings] == nil
+      
+    # else 
+    #   @movies = Movie.all
+    #   @ratings_filter = ['G', 'NC-17', 'PG', 'PG-13', 'R'] # shows all checkboxes checked
+
+    # if params[:sort] and params[:ratings] == nil
+    #   @movies = Movie.all
+    # elsif session[:sort]
+    #   params[:sort] = session[:sort]
+    #   if params[:sort] == 'title'
+    #     @movies = Movie.order('title ASC') # where("rating = 'R'") 
+    #     # @movies = Movie.order('title ASC').where
+    #     @hilite_title = true
+    #     # session.delete[:sort]
+    #     session[:sort] = 'title'
+    #   elsif params[:sort] == 'release_date'
+    #     @movies = Movie.order('release_date DESC') 
+    #     @hilite_date = true
+    #     # session.delete[:sort]
+    #     session[:sort] = 'release_date'
+
+    @all_ratings = all_ratings() # sets checkboxes in index.html.haml
+
     unless params[:sort]
       session[:sort] ? params[:sort] = session[:sort] : @movies = Movie.all
     end
 
-      @all_ratings = all_ratings()
-    if params[:sort] == 'title'
-      @movies = Movie.order('title ASC')
-      @hilite_title = true
-      # session.delete[:sort]
-      session[:sort] = 'title'
-    elsif params[:sort] == 'release_date'
-      @movies = Movie.order('release_date DESC')
-      @hilite_date = true
-      # session.delete[:sort]
-      session[:sort] = 'release_date'
+    if params[:sort]
+      # @movies = Movie.order(params[:sort] + ' ASC').where(session[:ratings] ? 'rating: #{session[:ratings].keys}' : "")
+      @movies = Movie.order(params[:sort] + ' ASC')
+      session[:sort] = params[:sort]
+      if params[:sort] == 'title'
+        @hilite_title = true
+      elsif params[:sort] == 'release_date'
+        @hilite_date = true
+      end
     else
-      # session[:sort] ? params[:sort] = session[:sort] : @movies = Movie.all
-      @movies = Movie.all
-      # session[:filtered_movies] = @movies
+      @movies
     end
+
+    #   @all_ratings = all_ratings()
+    # if params[:sort] == 'title'
+    #   # @movies = Movie.order('title ASC') # where("rating = 'R'")
+    #   @movies = Movie.order(params[:sort] + ' ASC') # where("rating = 'R'")
+    #   @hilite_title = true
+    #   # session.delete[:sort]
+    #   session[:sort] = params[:sort]
+    # elsif params[:sort] == 'release_date'
+    #   @movies = Movie.order(params[:sort] + ' ASC') 
+    #   @hilite_date = true
+    #   # session.delete[:sort]
+    #   session[:sort] = params[:sort]
+    # else
+    #   # session[:sort] ? params[:sort] = session[:sort] : @movies = Movie.all
+    #   # @movies = Movie.all
+    #   @movies
+    #   # session[:filtered_movies] = @movies
+    # end
 
     unless params[:ratings]
       session[:ratings] ? params[:ratings] = session[:ratings] : @movies
     end
-    # to save selected boxes
-    if params[:ratings] == nil # upon first visit to the site
-      @ratings_filter = ['G', 'NC-17', 'PG', 'PG-13', 'R'] # shows all checkboxes checked
-      # session[:ratings] = nil
-    else
+
+    if params[:ratings]
       selected_movies = []
       session[:ratings] = params[:ratings]
       @ratings_filter = params[:ratings].keys
-      @ratings_filter.each do |rating|
-        selected_movies << Movie.where("rating = '#{rating}'")
-        selected_movies.flatten!
-      end
-      @movies = selected_movies
+      @movies = Movie.where(rating: @ratings_filter)
+      # @ratings_filter.each do |rating|
+      #   selected_movies << Movie.where('rating = ?', rating) 
+      #   selected_movies.flatten!
+      # end
+      # @movies = selected_movies
+    else
+      @ratings_filter = ['G', 'NC-17', 'PG', 'PG-13', 'R'] # shows all checkboxes checked if no params[:ratings]
     end
-    # session[:filtered_movies] = @movies
   end
+    # else
+    #   selected_movies = []
+    #   session[:ratings] = params[:ratings]
+    #   @ratings_filter = params[:ratings].keys
+    #   @ratings_filter.each do |rating|
+    #     selected_movies << Movie.where("rating = '#{rating}'") 
+    #     selected_movies.flatten!
+    #   end
+    #   @movies = selected_movies
+    # end
+
+
+
+
+    # to save selected boxes
+    # if params[:ratings] == nil # upon first visit to the site
+    #   @ratings_filter = ['G', 'NC-17', 'PG', 'PG-13', 'R'] # shows all checkboxes checked
+    #   # session[:ratings] = nil
+    # else
+    #   selected_movies = []
+    #   session[:ratings] = params[:ratings]
+    #   @ratings_filter = params[:ratings].keys
+    #   @ratings_filter.each do |rating|
+    #     selected_movies << Movie.where("rating = '#{rating}'") 
+    #     selected_movies.flatten!
+    #   end
+    #   @movies = selected_movies
+    # end
+    # session[:filtered_movies] = @movies
+  # end
 
   def new
     # default: render 'new' template
