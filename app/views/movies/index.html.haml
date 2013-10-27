@@ -3,16 +3,23 @@
 
 = form_tag movies_path, :id => 'ratings_form', :method => :get do
   Include:
+  / - @all_ratings.each do |rating|
   - @all_ratings.each do |rating|
     = rating
+    - @session[:ratings] ? @ratings_filter = @session[:ratings].keys : @ratings_filter = ['G', 'NC-17', 'PG', 'PG-13', 'R']
+    / NEED TO MOVE BACK TO CONTROLLER!!!
+    / - @ratings_filter = @session[:ratings].keys
     = check_box_tag "ratings[#{rating}]", '1', @ratings_filter.include?(rating) ? true: false
+    / # = check_box_tag "ratings[#{rating}]", '1', @session[:ratings].keys.include?(rating) ? true: false
+    / = check_box_tag "ratings[#{rating}]", '1', ['G', 'PG-13', 'R'].include?(rating) ? true: false
   = submit_tag 'Refresh', :id => 'ratings_submit'
   / = params[:ratings].inspect
   / = @ratings_filter.inspect
   / = @all_ratings
-  = session.inspect
+  = @session.inspect
   = params.inspect
-  = session[:ratings]
+  = @session[:ratings]
+  = @ratings_filter.inspect
 
 %table#movies
   %thead
